@@ -1,9 +1,7 @@
 package com.backend.tamboo.controller;
 
 import com.backend.tamboo.dto.UserRequest;
-import com.backend.tamboo.entity.Role;
 import com.backend.tamboo.entity.User;
-import com.backend.tamboo.repository.RoleRepository;
 import com.backend.tamboo.repository.UserRepository;
 import com.backend.tamboo.util.JWTUtil;
 import org.slf4j.Logger;
@@ -27,67 +25,13 @@ public class AuthController {
     private final UserRepository userRepository;
 
     @Autowired
-    private RoleRepository roleRepository; // Per assegnare un ruolo predefinito
-    @Autowired
     private JWTUtil jwtUtil;
     @Autowired
-    private final PasswordEncoder passwordEncoder; // se usi password hashate
+    private final PasswordEncoder passwordEncoder;
 
-    // Inietti via costruttore o @Autowired
     public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-    }
-
-    // Classe che rappresenta la richiesta JSON (email, password)
-    public static class LoginRequest {
-        private String email;
-        private String password;
-
-        // getter e setter
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-    }
-
-    // Classe di esempio per la risposta JSON
-    public static class LoginResponse {
-        private String message;
-        private String token; // se vuoi restituire un token, ad esempio JWT
-
-        public LoginResponse(String message, String token) {
-            this.message = message;
-            this.token = token;
-        }
-
-        // getter e setter
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-
-        public String getToken() {
-            return token;
-        }
-
-        public void setToken(String token) {
-            this.token = token;
-        }
     }
 
     @PostMapping("/login")
@@ -97,7 +41,6 @@ public class AuthController {
 
         logger.info("Tentativo di login con email: {}", email);
 
-        // Controlla se l'utente esiste
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
             logger.warn("Email non esistente: {}", email);
@@ -107,28 +50,24 @@ public class AuthController {
 
         User user = userOpt.get();
 
-        // Controlla la password hashata
         if (!passwordEncoder.matches(password, user.getPassword())) {
             logger.warn("Password errata per email: {}", email);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "login.error.wrongPassword"));
         }
 
-        // Genera il token JWT
         String token = jwtUtil.generateToken(user.getId());
 
-        // Risposta con ID utente e token
         return ResponseEntity.ok(Map.of(
                 "message", "Login effettuato con successo",
                 "token", token,
-                "userId", user.getId(), // Restituisce l'ID dell'utente
+                "userId", user.getId(),
                 "userRole", user.getRole().getId(),
                 "name", user.getName()
         ));
     }
 
 
-    // Endpoint di creazione utente
     @PostMapping("/createUser")
     public ResponseEntity<?> createUser(@RequestBody UserRequest request) {
         logger.info("Richiesta di creazione utente ricevuta per email: {}", request.getEmail());
@@ -147,7 +86,6 @@ public class AuthController {
             newUser.setDate(request.getBirthday());
 
             newUser.setEmail(request.getEmail());
-            // Hash della password
             newUser.setPassword(passwordEncoder.encode(request.getPassword()));
             newUser.setDescription(request.getDescription());
 
@@ -163,7 +101,6 @@ public class AuthController {
         }
     }
 
-    // Endpoint di test per verificare che il controller funzioni
     @GetMapping("/test")
     public ResponseEntity<String> test() {
         System.out.println("test funziona");

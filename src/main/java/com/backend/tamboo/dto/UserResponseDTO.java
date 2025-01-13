@@ -12,7 +12,6 @@ public class UserResponseDTO {
     private String description;
     private Integer role;
 
-    // Costruttore
     public UserResponseDTO(Integer id, String name, String surname, LocalDate birthDay, String gender, String email, String description, Integer role) {
         this.id = id;
         this.name = name;
@@ -24,7 +23,6 @@ public class UserResponseDTO {
         this.role = role;
     }
 
-    // Getter e Setter
     public Integer getId() {
         return id;
     }

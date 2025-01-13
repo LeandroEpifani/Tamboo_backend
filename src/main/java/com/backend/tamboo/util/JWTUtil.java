@@ -22,15 +22,15 @@ public class JWTUtil {
 
     public String generateToken(Integer userId) {
         return Jwts.builder()
-                .setSubject(userId.toString()) // Usa l'ID come subject
-                .claim("userId", userId)       // Inserisce l'ID utente come claim
-                .setIssuedAt(new Date())          // Data di creazione
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs)) // Scadenza
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512) // Firma il token
+                .setSubject(userId.toString())
+                .claim("userId", userId)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .compact();
     }
 
-    public Integer extractEmployeeId(String token) {
+    public Integer extractUserId(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(jwtSecret)
                 .parseClaimsJws(token)
@@ -48,7 +48,6 @@ public class JWTUtil {
     }
 
     private Key getSigningKey() {
-        // Decodifica la chiave segreta da Base64
         byte[] keyBytes = java.util.Base64.getDecoder().decode(jwtSecret);
         return Keys.hmacShaKeyFor(keyBytes);
     }

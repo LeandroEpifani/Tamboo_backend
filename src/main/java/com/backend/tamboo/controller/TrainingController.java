@@ -2,7 +2,6 @@ package com.backend.tamboo.controller;
 
 import com.backend.tamboo.dto.TrainingRequest;
 import com.backend.tamboo.entity.Training;
-import com.backend.tamboo.entity.User;
 import com.backend.tamboo.repository.TrainingRepository;
 import com.backend.tamboo.repository.UserRepository;
 import org.slf4j.Logger;
@@ -31,14 +30,12 @@ public class TrainingController {
 
 
         try {
-            // Crea un nuovo oggetto Training
             Training training = new Training();
-            training.setName(request.getName()); // Aggiunto il campo 'name'
+            training.setName(request.getName());
             training.setTimeSignature(request.getTimeSignature());
             training.setBpm(request.getBpm());
             training.setBeat(request.getBeat());
 
-            // Salva nel database
             trainingRepository.save(training);
 
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -57,14 +54,12 @@ public class TrainingController {
         logger.info("Richiesta di recupero di tutti i training");
 
         try {
-            // Recupera tutti i training
             List<Training> trainings = trainingRepository.findAll();
 
-            // Converte i dati in DTO
             List<TrainingRequest> response = trainings.stream().map(training ->
                     new TrainingRequest(
-                            training.getId(), // Aggiunto l'ID
-                            training.getName(), // Aggiunto il campo 'name'
+                            training.getId(),
+                            training.getName(),
                             training.getTimeSignature(),
                             training.getBpm(),
                             training.getBeat()
@@ -84,17 +79,14 @@ public class TrainingController {
         logger.info("Richiesta di recupero del training con ID: {}", id);
 
         try {
-            // Recupera il training dal database
             Training training = trainingRepository.findById(id).orElse(null);
 
-            // Controlla se l'allenamento esiste
             if (training == null) {
                 logger.warn("Training non trovato con ID: {}", id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("Training non trovato con ID: " + id);
             }
 
-            // Converte i dati in DTO
             TrainingRequest response = new TrainingRequest(
                     training.getId(),
                     training.getName(),
@@ -116,10 +108,8 @@ public class TrainingController {
         logger.info("Richiesta di aggiornamento del training con ID: {}", id);
 
         try {
-            // Recupera il training dal database
             Training training = trainingRepository.findById(id).orElse(null);
 
-            // Controlla se l'allenamento esiste
             if (training == null) {
                 logger.warn("Training non trovato con ID: {}", id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -127,7 +117,6 @@ public class TrainingController {
             }
 
 
-            // Aggiorna i dati solo se forniti nella richiesta
             if (request.getName() != null) {
                 training.setName(request.getName());
             }
@@ -141,7 +130,6 @@ public class TrainingController {
                 training.setBeat(request.getBeat());
             }
 
-            // Salva i dati aggiornati nel database
             trainingRepository.save(training);
 
             logger.info("Training aggiornato correttamente con ID: {}", id);
@@ -158,7 +146,6 @@ public class TrainingController {
         logger.info("Richiesta di eliminazione del training con ID: {}", id);
 
         try {
-            // Controlla se l'allenamento esiste
             Training training = trainingRepository.findById(id).orElse(null);
             if (training == null) {
                 logger.warn("Training non trovato con ID: {}", id);
@@ -166,7 +153,6 @@ public class TrainingController {
                         .body("Training non trovato con ID: " + id);
             }
 
-            // Elimina l'allenamento
             trainingRepository.delete(training);
 
             logger.info("Training eliminato correttamente con ID: {}", id);

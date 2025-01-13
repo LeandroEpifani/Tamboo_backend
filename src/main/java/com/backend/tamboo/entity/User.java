@@ -4,10 +4,9 @@ import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user")  // Assicurati che il nome della tabella corrisponda al DB
+@Table(name = "user")
 public class User {
 
     @Id
@@ -21,7 +20,7 @@ public class User {
     private String surname;
 
     @Column(name = "date", nullable = false)
-    private LocalDate date;  // Mappa il campo 'date' del DB
+    private LocalDate date;
 
     @Column(nullable = false, length = 1)
     private String gender;
@@ -29,7 +28,7 @@ public class User {
     @Column(nullable = false, length = 60, unique = true)
     private String email;
 
-    @JsonIgnore  // Evita che la password venga serializzata nelle risposte JSON
+    @JsonIgnore
     @Column(nullable = false, length = 200)
     private String password;
 
@@ -41,11 +40,9 @@ public class User {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
-    // Costruttore senza argomenti
     public User() {
     }
 
-    // Costruttore completo (opzionale)
     public User(String name, String surname, LocalDate date, String gender, String email, String password, String description, Role role) {
         this.name = name;
         this.surname = surname;
@@ -56,8 +53,6 @@ public class User {
         this.description = description;
         this.role = role;
     }
-
-    // Getter e Setter
 
     public Integer getId() {
         return id;
@@ -131,8 +126,8 @@ public class User {
     @PrePersist
     public void setDefaultRole() {
         if (this.role == null) {
-            this.role = new Role(); // Assicurati che il ruolo con ID 1 esista
-            this.role.setId(1);     // Imposta l'ID predefinito
+            this.role = new Role();
+            this.role.setId(1);
         }
     }
 }

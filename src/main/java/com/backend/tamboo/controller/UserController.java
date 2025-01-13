@@ -7,7 +7,6 @@ import com.backend.tamboo.entity.User;
 import com.backend.tamboo.repository.RoleRepository;
 import com.backend.tamboo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,7 +22,7 @@ import java.util.Optional;
 @RequestMapping("/api/user")
 public class UserController {
 
-    private final PasswordEncoder passwordEncoder; // se usi password hashate
+    private final PasswordEncoder passwordEncoder;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -41,7 +40,6 @@ public class UserController {
     public ResponseEntity<?> getUserById(@PathVariable Integer id) {
         logger.info("Richiesta informazioni utente per ID: {}", id);
 
-        // Cerca l'utente per ID
         Optional<User> userOpt = userRepository.findById(id);
         if (userOpt.isEmpty()) {
             logger.warn("Utente non trovato con ID: {}", id);
@@ -49,10 +47,8 @@ public class UserController {
                     .body(Map.of("error", "Utente non trovato"));
         }
 
-        // Recupera l'utente
         User user = userOpt.get();
 
-        // Converte l'utente in DTO
         UserResponseDTO userDTO = new UserResponseDTO(
                 user.getId(),
                 user.getName(),
@@ -61,10 +57,9 @@ public class UserController {
                 user.getGender(),
                 user.getEmail(),
                 user.getDescription(),
-                user.getRole().getId() // Recupera il nome del ruolo
+                user.getRole().getId()
         );
 
-        // Torna i dati come risposta
         return ResponseEntity.ok(userDTO);
     }
 
@@ -72,7 +67,6 @@ public class UserController {
     public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody UserRequest request) {
         logger.info("Richiesta di aggiornamento dati utente per ID: {}", id);
 
-        // Controlla se l'utente esiste
         Optional<User> userOpt = userRepository.findById(id);
         if (userOpt.isEmpty()) {
             logger.warn("Utente non trovato con ID: {}", id);
@@ -80,10 +74,8 @@ public class UserController {
                     .body(Map.of("error", "Utente non trovato"));
         }
 
-        // Recupera l'utente dal database
         User user = userOpt.get();
 
-        // Aggiorna i dati dell'utente solo se forniti
         if (request.getName() != null) {
             user.setName(request.getName());
         }
@@ -93,11 +85,10 @@ public class UserController {
         }
 
         if (request.getBirthday() != null) {
-            user.setDate(request.getBirthday()); // Aggiorna il compleanno
+            user.setDate(request.getBirthday());
         }
 
         if (request.getEmail() != null) {
-            // Controlla se l'email è già in uso da un altro utente
             Optional<User> emailCheck = userRepository.findByEmail(request.getEmail());
             if (emailCheck.isPresent() && !emailCheck.get().getId().equals(id)) {
                 logger.warn("Email già esistente: {}", request.getEmail());
@@ -115,21 +106,18 @@ public class UserController {
             user.setDescription(request.getDescription());
         }
 
-        // Gestione della password (hashing)
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(request.getPassword())); // Hash della password
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
-        // Salva i dati aggiornati nel database
         userRepository.save(user);
         logger.info("Dati utente aggiornati per ID: {}", id);
 
-        // Crea la risposta con i nuovi dati (escludendo la password)
         UserResponseDTO userDTO = new UserResponseDTO(
                 user.getId(),
                 user.getName(),
                 user.getSurname(),
-                user.getDate(),   // Compleanno aggiornato
+                user.getDate(),
                 user.getGender(),
                 user.getEmail(),
                 user.getDescription(),
@@ -144,10 +132,8 @@ public class UserController {
         logger.info("Richiesta di recupero di tutti gli utenti");
 
         try {
-            // Recupera tutti gli utenti dal database
             List<User> users = userRepository.findAll();
 
-            // Converte gli utenti in DTO per escludere la password
             List<UserResponseDTO> response = users.stream().map(user -> new UserResponseDTO(
                     user.getId(),
                     user.getName(),
@@ -159,7 +145,6 @@ public class UserController {
                     user.getRole().getId()
             )).toList();
 
-            // Torna la lista degli utenti
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Errore durante il recupero degli utenti: {}", e.getMessage());
@@ -173,7 +158,6 @@ public class UserController {
         logger.info("Richiesta di modifica ruolo per l'utente con ID: {}", id);
 
         try {
-            // Cerca l'utente per ID
             Optional<User> userOpt = userRepository.findById(id);
             if (userOpt.isEmpty()) {
                 logger.warn("Utente non trovato con ID: {}", id);
@@ -181,10 +165,8 @@ public class UserController {
                         .body(Map.of("error", "Utente non trovato"));
             }
 
-            // Recupera l'utente
             User user = userOpt.get();
 
-            // Cambia il ruolo
             Integer currentRoleId = user.getRole().getId();
             Role newRole;
             if (currentRoleId == 1) {
@@ -197,7 +179,6 @@ public class UserController {
                         .orElseThrow(() -> new IllegalStateException("Ruolo con ID 1 non trovato"));
             }
 
-            // Assegna il nuovo ruolo e salva
             user.setRole(newRole);
             userRepository.save(user);
 
@@ -214,7 +195,6 @@ public class UserController {
         logger.info("Richiesta di eliminazione utente con ID: {}", id);
 
         try {
-            // Cerca l'utente per ID
             Optional<User> userOpt = userRepository.findById(id);
             if (userOpt.isEmpty()) {
                 logger.warn("Utente non trovato con ID: {}", id);
@@ -222,11 +202,9 @@ public class UserController {
                         .body(Map.of("error", "error.user.notFound"));
             }
 
-            // Elimina l'utente
             userRepository.deleteById(id);
             logger.info("Utente con ID {} eliminato con successo", id);
 
-            // Torna un messaggio di successo
             return ResponseEntity.ok(Map.of("message", "Utente eliminato con successo"));
         } catch (Exception e) {
             logger.error("Errore durante l'eliminazione dell'utente con ID: {}", id, e);

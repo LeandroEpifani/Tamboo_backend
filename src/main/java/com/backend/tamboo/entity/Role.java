@@ -14,7 +14,6 @@ public class Role {
     @Column(nullable = false, unique = true)
     private String role;
 
-    // Se vuoi avere la lista di user associati a questo role (opzionale)
     @OneToMany(mappedBy = "role")
     private Set<User> users;
 

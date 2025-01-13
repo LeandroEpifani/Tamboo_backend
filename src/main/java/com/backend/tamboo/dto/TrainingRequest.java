@@ -3,12 +3,11 @@ package com.backend.tamboo.dto;
 public class TrainingRequest {
 
     private Integer id;
-    private String name; // Campo aggiunto
+    private String name;
     private String timeSignature;
     private String bpm;
     private String beat;
 
-    // Costruttori
     public TrainingRequest() {
     }
 

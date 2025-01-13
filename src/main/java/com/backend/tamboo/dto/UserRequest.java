@@ -11,8 +11,6 @@ public class UserRequest {
     private String password;
     private String description;
 
-    // Getter e Setter
-
     public String getName() {
         return name;
     }

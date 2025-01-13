@@ -23,7 +23,6 @@ public class Training {
     @Column(nullable = false)
     private String name; // Nuovo campo 'name'
 
-    // Relazione con la tabella di join usertraining
     @OneToMany(mappedBy = "training")
     private Set<UserTraining> userTrainings;
 

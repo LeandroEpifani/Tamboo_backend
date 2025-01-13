@@ -18,10 +18,6 @@ public class UserTrainingId implements Serializable {
         this.trainingId = trainingId;
     }
 
-    // getter e setter
-    // equals & hashCode
-    // ...
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

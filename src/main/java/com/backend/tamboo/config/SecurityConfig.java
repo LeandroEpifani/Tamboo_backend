@@ -26,26 +26,17 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors().and().csrf().disable()
-
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers( "/api/createUser", "/api/login").permitAll() // Permetti questi endpoint
+                        .requestMatchers("/api/createUser", "/api/login").permitAll()
                         .anyRequest().authenticated()
-
                 )
-
                 .sessionManagement(session -> session
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(false)
-                        .and()
-                        .invalidSessionUrl("/api/login")
-                        .sessionFixation().migrateSession()
                         .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS)
                 )
-
-                // Disabilita la gestione predefinita del logout
                 .logout(logout -> logout
-                        .logoutUrl("/disable-default-logout") // URL fittizio per disabilitare il logout di default
-                );
+                        .logoutUrl("/disable-default-logout")
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
 
         return http.build();
@@ -65,10 +56,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Aggiungi l'origine del frontend
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Metodi permessi
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type")); // Header permessi
-        configuration.setAllowCredentials(true); // Consenti credenziali per cookie e autenticazione
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
